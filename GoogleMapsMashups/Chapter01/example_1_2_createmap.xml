@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="Empire State Building" 
+	description="Creating a Simple Map and Marker"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+<Require feature="sharedmap"/>
+</ModulePrefs>
+<Content type="html"><![CDATA[
+
+<h2>Empire State Building</h2>
+
+<script>
+
+// Create a map and center it over the Empire State Building
+var map = new GMap2();
+var point = new GLatLng(40.748330, -73.984615);
+map.setCenter(point, 17);
+
+// Add a marker right on the Empire State Building
+var marker = new GMarker(point);
+map.addOverlay(marker);
+
+</script>
+
+]]></Content>
+</Module>

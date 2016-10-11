@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Mapping Remote Content" 
+	description="Mapping Remote XML"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+
+<style type="text/css">
+<!--
+body,div,span,p {
+    font-family: arial, sans-serif;
+    font-size: 12px;
+}
+-->
+</style>
+
+<p><a href="#" onclick="loadData(); return false;">Load Data</a><p>
+
+<p>status: <span id="status">Nothing loaded yet. Click Load Data above.</span></p>
+
+<p id="content"></p>
+
+<script>
+
+var map = new GMap2();
+
+// array of our markers - we'll initialize below
+var markers = null; 
+
+// NOTE: edit this URL to point to your own XML file
+var url = "http://yourserver.com/path/to/markers.xml";
+
+function handleFetchContent(response) {
+
+	// make sure that we fetched valid XML data
+	if (response == null || typeof(response) != "object" || response.firstChild == null) {
+		_gel("status").innerHTML = "Failed to load valid XML data";
+		return;
+	}
+
+	// parse the concert data from the response
+	var concertData = response.getElementsByTagName("marker");
+	
+	// make sure we have at least one marker in the XML
+	if (concertData.length == 0) {
+		_gel("status").innerHTML = "Sorry, we don't have any concert data at this time";
+		return;
+	} 
+
+	_gel("status").innerHTML = "Done loading concert data...now rendering the map";
+	
+	var displayHTML = "";
+	
+	// create a new/fresh bounds object
+	var bounds = new GLatLngBounds();
+		
+	// remove all marker Events that we've created	
+	cleanupMarkers();
+	
+	// re-initialize the markers array
+	markers = new Array();
+	
+	for (var i = 0; i < concertData.length; i++) {
+		var concert = concertData[i];
+		
+		var title = concert.getAttribute("title");
+		var venue = concert.getAttribute("venue");
+		var lat = concert.getAttribute("lat");
+		var lng = concert.getAttribute("lng");
+		
+		// create a marker and add it to the map	
+		var point = new GLatLng(lat, lng);
+		var marker = createMarker(point, title + " - " + venue);
+        
+		map.addOverlay(marker);
+
+		// add marker to our array so that we can track them
+		markers[i] = marker;
+		
+		// add the point to our Bounds object
+		bounds.extend(point);
+
+		// add our band/venue to the Mapplet display in the left-hand panel
+		// and show the marker info window when we click on the band/venue link
+		displayHTML += "<div><a href='#' onclick='clickMarker(" + i + ");'>" + title + " - " + venue + "</a></div>";
+	}
+    
+	// find the proper zoom level for the bounds
+	map.getBoundsZoomLevelAsync(bounds, function(level) {
+		map.setZoom(level);
+
+		// center the map so that all of the markers are visible
+		map.setCenter(bounds.getCenter());
+   	 
+		// don't render the list until we've centered the map
+		_gel("content").innerHTML = displayHTML;
+		_gel("status").innerHTML = "Done loading concert data";
+	});
+}
+
+// load the map data
+function loadData() {
+	// update the status field and clear out anything we have in 'content'
+	_gel("status").innerHTML = "loading...";
+	_gel("content").innerHTML = "";
+ 	 
+	_IG_FetchXmlContent(url, handleFetchContent);
+}
+
+// create markers
+function createMarker(point, markerTitle) {
+	var marker = new GMarker(point, {title: markerTitle});
+	GEvent.addListener(marker, "click", function() {
+		var html = "<b>" +  markerTitle + "</b>";
+		marker.openInfoWindowHtml(html, {disableGoogleLinks:true});
+	});
+	return marker;
+}
+
+// remove all marker Event Listeners and markers from the map
+function cleanupMarkers() {
+	if (markers == null)
+		return;
+   
+	for (var i = 0; i < markers.length; i++) {
+		var marker = markers[i];
+		GEvent.clearListeners(marker, "click");
+	}
+
+	if (map)
+		map.clearOverlays();
+}
+
+// simulate a marker click
+function clickMarker(index) {
+	GEvent.trigger(markers[index], "click");
+}
+
+</script>
+]]>
+</Content>
+</Module>

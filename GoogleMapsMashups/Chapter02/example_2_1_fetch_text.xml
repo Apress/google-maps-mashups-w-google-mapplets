@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Fetching Remote Content" 
+	description="Fetching Remote Content as Text"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+
+<h2>Fetching remote text content</h2>
+
+<script>
+
+var map = new GMap2();
+
+var url = "http://www.apress.com";
+
+function handleFetchContent(responseText) {
+
+	// check to see if there was an error in the fetch
+	if (responseText == null) {
+		// an error occurred
+		alert("failed to retrieve data from " + url);
+		return;
+	}
+
+	// display the text that was returned
+	// but only display the first 200 characters
+	alert(responseText.substr(0,200));
+}
+
+// fetch the url from apress.com
+_IG_FetchContent(url, handleFetchContent);
+
+</script>
+  ]]>
+  </Content>
+</Module>
+

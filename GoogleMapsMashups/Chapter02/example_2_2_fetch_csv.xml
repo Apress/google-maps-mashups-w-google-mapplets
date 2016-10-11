@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Fetching Remote Content" 
+	description="Fetching Remote Content as Text"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+
+<style type="text/css">
+<!--
+body,div,span,p {
+	font-family: arial, sans-serif;
+	font-size: 12px;
+}
+-->
+</style>
+
+<p><a href="#" onclick="loadData();">Load Data</a><p>
+
+<p>status: <span id="status">Nothing loaded yet. Click Load Data above.</span></p>
+
+<p id="content"></p>
+
+<script>
+
+var map = new GMap2();
+
+// NOTE: edit this URL to point to your own CSV file
+var url = "http://yourserver.com/path/to/markers.csv";
+
+function handleFetchContent(responseText) {
+        
+	// check to see if there was an error in the fetch
+	if (responseText == null) {
+		// an error occurred
+		_gel("status").innerHTML = "Failed to load data";
+		return;
+	}
+
+	_gel("status").innerHTML = "Done loading data";
+	
+	var displayHTML = "";
+	
+	// use the split to parse the incoming marker data
+	var markerData = responseText.split(",");
+
+	// loop over the individual marker data fields
+	for (var i = 0; i < markerData.length; i++) {
+	
+		// extract each field of data
+		displayHTML += markerData[i] + " ";
+
+		// since we have four fields of data per marker
+		// so we need to add a <br> tag to break up the display
+		// after we already have four fields of marker data
+		if ((i+1)%4 == 0) {
+			displayHTML += "<br/>";
+		}
+	}
+
+	_gel("content").innerHTML = displayHTML;
+}
+
+function loadData() {
+	_gel("status").innerHTML = "loading...";
+	_IG_FetchContent(url, handleFetchContent);
+}
+
+</script>
+]]>
+</Content>
+</Module>

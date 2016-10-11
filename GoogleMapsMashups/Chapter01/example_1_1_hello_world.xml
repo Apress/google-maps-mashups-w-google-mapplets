@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="Hello World" 
+    description="My First Mapplet"
+    author="Michael Young"
+    author_email="myoung@81nassau.com"
+    height="150">
+</ModulePrefs>
+<Content type="html"><![CDATA[
+
+<h2>Hello Michael!</h2>
+
+]]></Content>
+</Module>

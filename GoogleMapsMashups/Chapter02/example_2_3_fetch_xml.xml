@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Fetching Remote Content" 
+	description="Fetching Remote XML"
+	author="You Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+
+<style type="text/css">
+<!--
+body,div,span,p {
+	font-family: arial, sans-serif;
+	font-size: 12px;
+}
+-->
+</style>
+
+<p><a href="#" onclick="loadData();">Load Data</a><p>
+
+<p>status: <span id="status">Nothing loaded yet. Click Load Data above.</span></p>
+
+<p id="content"></p>
+
+<script>
+
+var map = new GMap2();
+
+// NOTE: edit this URL to point to your own XML file
+var url = "http://yourserver.com/path/to/markers.xml";
+
+function handleFetchContent(response) {
+   
+	// make sure that we fetched valid XML data
+	if (response == null || typeof(response) != "object" || response.firstChild == null) {
+		_gel("status").innerHTML = "Failed to load valid XML data";
+		return;
+	}
+
+	_gel("status").innerHTML = "Done loading";
+
+	var markers = response.getElementsByTagName("marker");
+	 
+	var displayHTML = "";
+	
+	for (var i = 0; i < markers.length; i++) {
+		var marker  = markers[i];
+
+		var title = marker.getAttribute("title");
+		var venue = marker.getAttribute("venue");
+		var lat   = marker.getAttribute("lat");
+		var lng   = marker.getAttribute("lng");
+		displayHTML += "<div>" + title + " - " + venue + "</div>";
+	}
+
+	_gel("content").innerHTML = displayHTML;
+}
+
+function loadData() {
+	_gel("status").innerHTML = "loading...";
+	_IG_FetchXmlContent(url, handleFetchContent);
+}
+
+</script>
+]]>
+</Content>
+</Module>

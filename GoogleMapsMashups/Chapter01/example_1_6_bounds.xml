@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="New York Clubs" 
+	description="Dynamically Adding Clickable Markers to the Map"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap"/>
+</ModulePrefs>
+<Content type="html"><![CDATA[
+
+<h2>New York Clubs</h2>
+
+<script>
+
+function createMarker(point, venue) {
+	var marker = new GMarker(point, {title: venue});
+    
+	GEvent.addListener(marker, "click", function() {
+		var html  = "<b>" + venue + "</b>";
+		marker.openInfoWindowHtml(html);
+	});
+	return marker;
+}
+    
+var data = [
+	{ "venue": "Knitting Factory", "lat": 40.7173, "lng": -74.0053}, 
+	{ "venue": "Bowery Ballroom",  "lat": 40.7205, "lng": -73.9937}
+];
+    
+// Create a map
+var map    = new GMap2();
+var bounds = new GLatLngBounds();
+ 	 
+var count = data.length; 
+for (var i = 0; i < count; i++) {
+	var club = data[i];
+   
+	// Add the marker to the map
+	var point  = new GLatLng(club.lat, club.lng);
+	map.addOverlay(createMarker(point, club.venue));
+   
+	// Add the point to our bounds object
+	bounds.extend(point);
+}
+    
+// Find the proper zoom level for the bounds and center the map
+map.getBoundsZoomLevelAsync(bounds, function(level) {
+	map.setCenter(bounds.getCenter());
+	map.setZoom(level);
+});
+
+</script>
+
+]]></Content>
+</Module>
+

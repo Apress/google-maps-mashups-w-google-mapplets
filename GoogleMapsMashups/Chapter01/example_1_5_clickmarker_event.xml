@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+<ModulePrefs title="New York Clubs" 
+	description="Responding to Mapplet Events"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="150">
+	<Require feature="sharedmap"/>
+</ModulePrefs>
+<Content type="html"><![CDATA[
+
+<h2>New York Clubs</h2>
+
+<script>
+
+function createMarker(point, venue) {
+	var marker = new GMarker(point, {title: venue});
+
+	GEvent.addListener(marker, "click", function() {
+		var html  = "<b>" + venue + "</b>";
+		marker.openInfoWindowHtml(html);
+	});
+	return marker;
+}
+
+// Create a map
+var map = new GMap2();
+
+// Create two points and markers:
+// One for the Knitting Factory and one for the Bowery Ballroom
+var pointKF = new GLatLng(40.7173, -74.0053); 
+var pointBB = new GLatLng(40.7205, -73.9937);
+   
+// Now create the markers
+var markerKF = createMarker(pointKF, "Knitting Factory");
+var markerBB = createMarker(pointBB, "Bowery Ballroom");
+   
+// Add the markers to the map
+map.addOverlay(markerKF);
+map.addOverlay(markerBB);
+  	 
+// Center the map over Manhattan so we can see both markers
+map.setCenter(new GLatLng(40.7204, -73.9998), 15);
+
+</script>
+
+]]></Content>
+</Module>

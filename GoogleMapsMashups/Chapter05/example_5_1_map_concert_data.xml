@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Tourfilter Concerts" 
+	description="Mapping Tourfilter Concerts"
+	author="Your Name Goes Here"
+	author_email="Your Email Goes Here"
+	height="450">
+	<Require feature="sharedmap" />
+	<Require feature="dynamic-height" />
+</ModulePrefs>
+<Content type="html">
+
+<![CDATA[
+
+<style type="text/css">
+<!--
+body,div,span,p {
+	font-family: arial, sans-serif;
+	font-size: 12px;
+}
+-->
+</style>
+
+<div id="header">Tourfilter</div>
+
+<p><a href="#" onclick="loadData('newyork');">Load Data</a><p>
+
+<div class="status">Status: <span id="status">Nothing loaded yet. Click the Load Data link above.</span></div>
+
+<p id="content"></p>
+
+<script>
+
+var map = new GMap2();
+
+// array of our markers - we'll initialize below
+var markers = null; 
+
+function handleFetchContent (response, city) {
+   
+	// make sure that we fetched valid XML data
+	if (response == null || typeof(response) != "object" || response.firstChild == null) {
+		_gel("status").innerHTML = "Failed to load valid XML data";
+		return;
+	}
+
+	var markerData = response.getElementsByTagName("markers");
+	// make sure we have at least one marker in the XML
+	if (markerData.length == 0) {
+		_gel("status").innerHTML = "Sorry, we don't have any concert data at this time";
+		return;
+	}
+
+	// parse the concert data from the response
+	var concertData = response.getElementsByTagName("marker");
+
+	// make sure we have at least one marker in the XML
+	if (concertData.length == 0) {
+		_gel("status").innerHTML = "Sorry, we don't have any concert data at this time";
+		return;
+	}
+
+	_gel("status").innerHTML = "Done loading concert data...now rendering the map";
+
+	var displayHTML = "";
+   
+	// create a new/fresh bounds object
+	var bounds = new GLatLngBounds();
+
+	// remove all marker Events that we've created	
+	cleanupMarkers();
+
+	// re-initialize the markers array
+	markers = new Array();
+
+	var displayDate = "";
+	for (var i = 0; i < concertData.length; i++) {
+		var concert = concertData[i];
+
+		var band = concert.getAttribute("band");
+		var venue = concert.getAttribute("venue");
+		var date = concert.getAttribute("date");
+		var lat = concert.getAttribute("lat");
+ 		var lng = concert.getAttribute("lng");
+
+		// create a marker and add it to the map	
+		var point = new GLatLng(lat, lng);
+		var marker = createMarker(point, city, band, venue, date);
+		map.addOverlay(marker);
+
+		// add marker to our array so that we can track them
+		markers[i] = marker;
+
+		// add the point to our Bounds object
+		bounds.extend(point);
+
+		if (date != displayDate) {
+			displayHTML += "<div class='date'>" + date + "</div>";
+			displayDate = date;
+		}
+
+		// add our band/venue to the Mapplet display in the left-hand panel
+		// and show the marker info window when we click on the band/venue link
+		displayHTML += "<div class='listing'>";
+		displayHTML += " <a href='#' onclick='clickMarker(" + i + ");'>" + band + "</a>";
+		displayHTML += " <span class='venue'>" + venue + "</span>";
+		displayHTML += "</div>";
+	}
+
+	// find the proper zoom level for the bounds
+	// and center the map so that all of the markers are visible
+	map.getBoundsZoomLevelAsync(bounds, function(level) {
+		map.setCenter(bounds.getCenter());
+		map.setZoom(level);
+
+		// don't render the list until we've centered the map
+		_gel("content").innerHTML = displayHTML;
+		_gel("status").innerHTML = "Done loading concert data";
+	});
+
+	// resize the mapplet window height
+	_IG_AdjustIFrameHeight(); 
+}
+
+function loadData(city) {
+
+	// make sure a city has been selected
+	if (city == "")
+		return;
+
+	var url = "http://yourserver.com/path/to/xml/" + city + ".xml"; 
+
+	// update the status field and clear out anything we have in 'content'
+	_gel("status").innerHTML = "loading...";
+	_gel("content").innerHTML = "";
+
+	// fetch the XML data from the url
+	_IG_FetchXmlContent(url, _IG_Callback(handleFetchContent, city));
+}
+
+function createMarker(point, city, band, venue, date) {
+
+	// create the marker and add the onclick event listener
+	var marker = new GMarker(point, {title: band + " - " + venue});
+	GEvent.addListener(marker, "click", function() {
+
+		var html = "<div>" + band + "</div>";
+		html += "<div>" + date + " - " + venue + "</div>";
+		marker.openInfoWindowHtml(html, {disableGoogleLinks:true});
+	});
+
+	return marker;
+}
+
+// remove all marker Event Listeners and markers from the map
+function cleanupMarkers() {
+	if (markers == null)
+		return;
+
+	for (var i = 0; i < markers.length; i++) {
+		var marker = markers[i];
+		GEvent.clearListeners(marker, "click");
+	}
+
+	if (map)
+		map.clearOverlays();
+}
+
+// function called when we want to simulate a marker click
+function clickMarker(index) {
+	GEvent.trigger(markers[index], "click");
+}
+
+</script>
+]]>
+</Content>
+</Module>
+
